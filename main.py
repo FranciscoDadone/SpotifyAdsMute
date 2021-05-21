@@ -12,36 +12,48 @@ def mute(mute):
     except: pass
     os.system("pacmd list-sink-inputs > tmp/list-sink-inputs")
     process_id = []
+    # Count the number of inputs
     with open("tmp/list-sink-inputs", "r") as file:
-        wasFound = False
-        for line in file:
-            stripped_line = line.strip()
-            if(stripped_line[:7] == "index: "):
-                process_id.append(stripped_line[7:])
-            if(stripped_line == 'media.name = "Spotify"' or stripped_line == 'application.name = "Spotify"'): 
-                wasFound = True
-    if wasFound:
-        for process in process_id:
-            os.system(f"pacmd set-sink-input-mute {process} {mute}")
+        sink_input_lines = file.readlines()
+        
+        for i in range(len(sink_input_lines)):
+            line = sink_input_lines[i].strip()            
+            if line[:7] == "index: ":
+                for j in range(i, len(sink_input_lines)):
+                    if sink_input_lines[j][:7] == "index: ": break
+                    if sink_input_lines[j].strip() == 'media.name = "Spotify"' or sink_input_lines[j].strip() == 'application.name = "Spotify"': 
+                        process_id.append(line[7:])
+                        break
+                        
+    for process in process_id:
+        os.system(f"pacmd set-sink-input-mute {process} {mute}")
 
 def main():
     muted = False
+    old_song = ""
     while True:
         try:
-            print(spotify.current())
-            if spotify.current()[0] == 'Advertisement': 
+            # Displays to the terminal the current song name and artist.
+            if old_song != spotify.current()[0]:
+                print("Now listening to: ", spotify.current()[0], " - ", spotify.current()[1])
+                old_song = spotify.current()[0]
+            # Handles the mute process when there's an Ad.
+            if spotify.current()[0] == 'Advertisement' and not muted: 
                 mute("true")
                 muted = True
+            # Handles the unmute when the ad finishes and spotify is muted.
             elif muted and spotify.current()[0] != 'Advertisement':
                 mute("false")
                 muted = False
-            
-            
-            time.sleep(1)
+            time.sleep(1) # sleeps one second.
         except SpotifyPaused:
-            print("Spotify paused.")
+            if old_song != "":
+                print("Spotify paused.")
+                old_song = ""
         except SpotifyNotRunning or SpotifyClosed:
-            print("Spotify closed.")
+            if old_song != "":
+                print("Spotify closed.")
+                old_song = ""
 
 if __name__ == "__main__":
     main()
