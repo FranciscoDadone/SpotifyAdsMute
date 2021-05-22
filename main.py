@@ -29,6 +29,7 @@ def mute(mute):
         os.system(f"pacmd set-sink-input-mute {process} {mute}")
 
 def main():
+    mute("false")
     muted = False
     old_song = ""
     while True:
@@ -38,7 +39,7 @@ def main():
                 print("Now listening to: ", spotify.current()[0], " - ", spotify.current()[1])
                 old_song = spotify.current()[0]
             # Handles the mute process when there's an Ad.
-            if spotify.current()[0] == 'Advertisement' and not muted: 
+            if spotify.current()[0] == 'Advertisement': 
                 mute("true")
                 muted = True
             # Handles the unmute when the ad finishes and spotify is muted.
