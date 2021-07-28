@@ -21,10 +21,9 @@ def mute(mute):
             if line[:7] == "index: ":
                 for j in range(i, len(sink_input_lines)):
                     if sink_input_lines[j][:7] == "index: ": break
-                    if sink_input_lines[j].strip() == 'media.name = "Spotify"' or sink_input_lines[j].strip() == 'application.name = "Spotify"': 
+                    if sink_input_lines[j].strip() == 'media.name = "spotify"' or sink_input_lines[j].strip() == 'media.name = "Spotify"' or sink_input_lines[j].strip() == 'application.name = "Spotify"' or sink_input_lines[j].strip() == 'application.name = "spotify"': 
                         process_id.append(line[7:])
-                        break
-                        
+
     for process in process_id:
         os.system(f"pacmd set-sink-input-mute {process} {mute}")
 
@@ -34,19 +33,24 @@ def main():
     old_song = ""
     while True:
         try:
+            song_name_lower = spotify.current()[0].lower()
+            song_name = spotify.current()[0]
+            artist_name = spotify.current()[1]
+
             # Displays to the terminal the current song name and artist.
-            if old_song != spotify.current()[0]:
-                print("Now listening to: ", spotify.current()[0], " - ", spotify.current()[1])
-                old_song = spotify.current()[0]
+            if old_song != song_name:
+                print("Now listening to: ", song_name, " - ", artist_name)
+                old_song = song_name
             # Handles the mute process when there's an Ad.
-            if spotify.current()[0] == 'Advertisement': 
+            if 'advertisement' in song_name_lower or 'spotify' in song_name_lower:  
                 mute("true")
                 muted = True
             # Handles the unmute when the ad finishes and spotify is muted.
-            elif muted and spotify.current()[0] != 'Advertisement':
+            elif muted and ('advertisement' not in song_name_lower or 'spotify' not in song_name_lower):
                 mute("false")
                 muted = False
             time.sleep(1) # sleeps one second.
+            #print(muted)
         except SpotifyPaused:
             if old_song != "":
                 print("Spotify paused.")
