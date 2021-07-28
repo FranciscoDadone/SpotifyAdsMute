@@ -42,19 +42,11 @@ def main():
                 print("Now listening to: ", song_name, " - ", artist_name)
                 old_song = song_name
             # Handles the mute process when there's an Ad.
-<<<<<<< HEAD
             if 'advertisement' in song_name_lower or 'spotify' in song_name_lower:  
                 mute("true")
                 muted = True
             # Handles the unmute when the ad finishes and spotify is muted.
             elif muted and ('advertisement' not in song_name_lower or 'spotify' not in song_name_lower):
-=======
-            if spotify.current()[0] == 'Advertisement' or spotify.current()[0] == 'Spotify':  
-                mute("true")
-                muted = True
-            # Handles the unmute when the ad finishes and spotify is muted.
-            elif muted and (spotify.current()[0] != 'Advertisement' or spotify.current()[0] != 'Spotify'):
->>>>>>> d46a55a07598cb969914fec6383f0b085e065c0a
                 mute("false")
                 muted = False
             time.sleep(1) # sleeps one second.
